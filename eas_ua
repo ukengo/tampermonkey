@@ -1,0 +1,30 @@
+document.addEventListener('click', function(e) {
+    /*if (document.querySelector('#newnamest')) {
+        document.querySelector('#newnamest').value = "Сертифікат";
+    }
+    if (document.querySelector('#newdatest')) {
+        document.querySelector('#newdatest').value = '2023-11-11';
+    }
+    if (document.querySelector('#newnorgst')) {
+        document.querySelector('#newnorgst').value = 'Оргкомітет конкурсу "Кенгуру" в Україні';
+    }*/
+    
+    if (document.querySelector('#newtype')) {
+        document.querySelector('#newtype').value = 'othercert';
+    }
+    if (document.querySelector('#switchernews0')) {
+        document.querySelector('#switchernews0').checked = true;
+    }
+    /*if (document.querySelector('#newnorg')) {
+        document.querySelector('#newnorg').value = 'Київський столичний університет імені Бориса Грінченка. Інститут післядипломної освіти';
+    }*/
+    if (document.querySelector('#newnorg')) {
+        document.querySelector('#newnorg').value = 'Київський університет імені Бориса Грінченка';
+    }
+    if (document.querySelector('#newhours')) {
+        document.querySelector('#newhours').value = "50";
+    }
+    /*if (document.querySelector('#newekts')) {
+        document.querySelector('#newekts').value = 0.1;
+    }*/
+})
