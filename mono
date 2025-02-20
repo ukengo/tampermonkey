@@ -1,0 +1,100 @@
+// ==UserScript==
+// @name         Mono-exportpayments
+// @namespace    http://tampermonkey.net/
+// @version      2025-02-11
+// @description  try to take over the world!
+// @author       You
+// @match        https://web.monobank.ua/
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=monobank.ua
+// @grant        none
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const urls = [
+        'https://web.monobank.ua/client/yLfcTN7D/?terminal=&uid=C2F1CE5B9DE88CE2E053080515AC7660',
+        'https://web.monobank.ua/client/GibSMDWo/?terminal=&uid=C2F1CE5BD01C8CE2E053080515AC7660'
+    ]
+
+    const createButtonSelector = '[data-nls="buttons.exportPayments"]' // Кнопка создания
+    const saveButtonSelector = '.button-save' // Кнопка сохранения
+
+    const processUrl = (url, callback) => {
+        const newTab = window.open(url, '_blank');
+
+        if (newTab) {
+            const checkButton = (selector, nextCallback) => {
+                const button = newTab.document.querySelector(selector);
+                if (button) {
+                    button.click();
+                    console.log(`Кнопка ${selector} найдена и нажата`);
+                    if (nextCallback) {
+                        nextCallback();
+                    } else {
+                        setTimeout(() => {
+                            newTab.close();
+                            console.log('Вкладка закрыта');
+                            callback();
+                        }, 500);
+                    }
+                } else {
+                    setTimeout(() => checkButton(selector, nextCallback), 500);
+                }
+            };
+
+            newTab.onload = () => {
+                setTimeout(() => {
+                    checkButton(createButtonSelector, () => {
+                        setTimeout(() => checkButton(saveButtonSelector), 500);
+                    });
+                }, 500);
+            };
+        } else {
+            console.error('Не удалось открыть страницу');
+            callback();
+        }
+    };
+
+    const processAllUrls = (index = 0) => {
+        if (index < urls.length) {
+            processUrl(urls[index], () => processAllUrls(index + 1));
+        }
+    };
+
+    function waitForElement(selector, callback) {
+        const observer = new MutationObserver((mutations, obs) => {
+            const element = document.querySelector(selector);
+            if (element) {
+                obs.disconnect(); // Останавливаем наблюдатель
+                callback(element);
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Ждём появления элемента
+    waitForElement('.referal-btn-container', (element) => {
+        const btn = document.createElement("button")
+        const btnInvite = document.querySelector('.fop-invite-btn')
+        btn.textContent = "Вивантажити виписку"
+        btn.classList.add('button', 'light')
+        btn.style.marginRight = 20+'px'
+
+        btn.addEventListener("click", () => processAllUrls())
+        btnInvite.style.width = 300+'px'
+        element.insertBefore(btn, btnInvite)
+    });
+
+    // Симуляция динамического добавления элемента через 3 секунды
+    setTimeout(() => {
+        let el = document.createElement("div");
+        el.id = "target";
+        el.textContent = "Я появился!";
+        document.body.appendChild(el);
+    }, 3000);
+
+
+
+})();
