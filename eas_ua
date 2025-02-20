@@ -1,5 +1,78 @@
-document.addEventListener('click', function(e) {
-    /*if (document.querySelector('#newnamest')) {
+// ==UserScript==
+// @name         eas
+// @namespace    http://tampermonkey.net/
+// @version      2025-01-24
+// @description  try to take over the world!
+// @author       You
+// @match        https://eas.ua/certificates
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=eas.ua
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    //---Назва організації, що видала сертифікат----------------------------------//
+    const org = [
+        'Київський столичний університет імені Бориса Грінченка. Інститут післядипломної освіти',
+        'Київський університет імені Бориса Грінченка',
+        'Центр професійного розвитку педагогічних працівників м.Києва',
+        'Державна освітня устаноіва "Навчально-методичний центр з питань якості освіти"',
+    ]
+
+    const nameOrg = document.querySelector('#newnorg')
+    if (nameOrg) {
+
+        const nameOrgSelect = document.createElement('input')
+        nameOrgSelect.id = 'nameorg-select'
+        nameOrgSelect.classList.add('form-control')
+        nameOrgSelect.setAttribute('list', 'nameorgselect-datalist')
+        nameOrgSelect.style.marginBottom = '10px'
+
+        const nameOrgDataL = document.createElement('datalist')
+        nameOrgDataL.id = 'nameorgselect-datalist'
+
+        const parentDiv = nameOrg.parentNode;
+        parentDiv.insertBefore(nameOrgSelect, nameOrg)
+        nameOrgSelect.append(nameOrgDataL)
+        afterDropDownReturned(org, nameOrgDataL)
+
+        document.getElementById('newnorg').value = org[0]
+
+        nameOrgSelect.addEventListener('change', mouseupOrg)
+        nameOrgSelect.addEventListener('dblclick', mouseupOrgClear)
+
+    }
+
+    function afterDropDownReturned(arrayOfArrays, datalist) {
+        if (datalist) {
+            //datalist.innerHTML = null;
+            arrayOfArrays.forEach((r) => {
+                const selectorOption = document.createElement('option');
+                selectorOption.textContent = r;
+                datalist.appendChild(selectorOption)
+            });
+        }
+    }
+
+    function mouseupOrg() {
+        const newnorg = document.getElementById('newnorg')
+        const nameOrgSelectVal = document.getElementById('nameorg-select').value
+        newnorg.value = nameOrgSelectVal
+    }
+
+    function mouseupOrgClear() {
+        document.getElementById('newnorg').value = ''
+        document.getElementById('nameorg-select').value = ''
+    }
+
+
+    //---Назва організації, що видала сертифікат-------------Кінець---------------------//
+
+
+
+    document.addEventListener('click', function(e) {
+        /*if (document.querySelector('#newnamest')) {
         document.querySelector('#newnamest').value = "Сертифікат";
     }
     if (document.querySelector('#newdatest')) {
@@ -8,23 +81,21 @@ document.addEventListener('click', function(e) {
     if (document.querySelector('#newnorgst')) {
         document.querySelector('#newnorgst').value = 'Оргкомітет конкурсу "Кенгуру" в Україні';
     }*/
-    
-    if (document.querySelector('#newtype')) {
-        document.querySelector('#newtype').value = 'othercert';
-    }
-    if (document.querySelector('#switchernews0')) {
-        document.querySelector('#switchernews0').checked = true;
-    }
-    /*if (document.querySelector('#newnorg')) {
-        document.querySelector('#newnorg').value = 'Київський столичний університет імені Бориса Грінченка. Інститут післядипломної освіти';
-    }*/
-    if (document.querySelector('#newnorg')) {
-        document.querySelector('#newnorg').value = 'Київський університет імені Бориса Грінченка';
-    }
-    if (document.querySelector('#newhours')) {
-        document.querySelector('#newhours').value = "50";
-    }
-    /*if (document.querySelector('#newekts')) {
+
+        if (document.querySelector('#newtype')) {
+            document.querySelector('#newtype').value = 'othercert';
+        }
+        if (document.querySelector('#switchernews0')) {
+            document.querySelector('#switchernews0').checked = true;
+        }
+
+
+        /*if (document.querySelector('#newhours')) {
+            document.querySelector('#newhours').value = "50";
+        }*/
+        /*if (document.querySelector('#newekts')) {
         document.querySelector('#newekts').value = 0.1;
     }*/
-})
+        /**/
+    })
+})();
