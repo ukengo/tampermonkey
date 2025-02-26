@@ -12,12 +12,20 @@
 (function() {
     'use strict';
 
+    const TOTAL_HOURS_INPUT = document.querySelector('#newhours')
+    const CREDITS_INPUT = document.querySelector('#newekts')
+
+
+
+
+
     //---Назва організації, що видала сертифікат----------------------------------//
     const org = [
         'Київський столичний університет імені Бориса Грінченка. Інститут післядипломної освіти',
         'Київський університет імені Бориса Грінченка',
         'Центр професійного розвитку педагогічних працівників м.Києва',
         'Державна освітня устаноіва "Навчально-методичний центр з питань якості освіти"',
+        'Суб’єкт підвищення кваліфікації ТОВ «Видавництво "Світич"',
     ]
 
     const nameOrg = document.querySelector('#newnorg')
@@ -66,9 +74,33 @@
         document.getElementById('nameorg-select').value = ''
     }
 
-
     //---Назва організації, що видала сертифікат-------------Кінець---------------------//
 
+
+
+    //---Години і кредити-------------
+
+    TOTAL_HOURS_INPUT.addEventListener('click', function(e) {
+        if(TOTAL_HOURS_INPUT.value == 0) {
+            TOTAL_HOURS_INPUT.value = '';
+            CREDITS_INPUT.value = '';
+        }
+    })
+
+    TOTAL_HOURS_INPUT.addEventListener('input', function(e) {
+        CREDITS_INPUT.value = +TOTAL_HOURS_INPUT.value * 0.033333333333333333333;
+        CREDITS_INPUT.value = Number.isInteger(+CREDITS_INPUT.value) ? +CREDITS_INPUT.value : (+CREDITS_INPUT.value).toFixed(2);
+        switch (TOTAL_HOURS_INPUT.value) {
+            case '3':
+                CREDITS_INPUT.value = '0.1';
+                break;
+            case '30':
+                CREDITS_INPUT.value = '1';
+                break;
+        }
+    });
+
+    //----Години і кредити --- КІНЕЦЬ ----
 
 
     document.addEventListener('click', function(e) {
@@ -97,5 +129,7 @@
         document.querySelector('#newekts').value = 0.1;
     }*/
         /**/
+
+
     })
 })();
