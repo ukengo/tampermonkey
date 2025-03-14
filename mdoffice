@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         News Text Cleaner
 // @namespace    http://tampermonkey.net/
-// @version      2025-03-14
-// @description  Cleans and copies news text from mdoffice.com.ua, replacing <br> with <p>, removing emojis and <em>, converting numbered lists to <ol>, specific <p> to <h4> without style, removing empty <p>, converting dash lists to <ul>
+// @version      2025-03-14c
+// @description  Cleans and copies news text from mdoffice.com.ua, replacing <br> with <p>, removing emojis and <em>, converting numbered lists to <ol>, specific <p> to <h4> without style, removing empty <p>, converting dash lists to <ul>, preserving original <p> structure
 // @author       You
 // @match        https://www.mdoffice.com.ua/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=mdoffice.com.ua
@@ -70,25 +70,6 @@
         });
     }
 
-    function splitTextIntoParagraphs(element) {
-        const paragraphs = Array.from(element.getElementsByTagName('p'));
-        paragraphs.forEach(p => {
-            const text = p.textContent.trim();
-            if (text.includes('.')) {
-                const sentences = text.split(/(?<=\.)\s*(?=[А-ЯЄІЇҐ])/g).filter(s => s.trim());
-                if (sentences.length > 1) {
-                    const fragment = document.createDocumentFragment();
-                    sentences.forEach(sentence => {
-                        const newP = document.createElement('p');
-                        newP.textContent = sentence.trim();
-                        fragment.appendChild(newP);
-                    });
-                    p.parentNode.replaceChild(fragment, p);
-                }
-            }
-        });
-    }
-
     function processNumberedLists(element) {
         const paragraphs = Array.from(element.getElementsByTagName('p'));
         let currentOl = null;
@@ -118,7 +99,7 @@
 
                 lastNumber = number;
             } else if (currentOl) {
-                currentOl = null; // Скидаємо, якщо наступний елемент не є частиною списку
+                currentOl = null;
                 lastNumber = 0;
             }
         });
@@ -180,8 +161,7 @@
         paragraphs.forEach(p => {
             const text = p.textContent.trim();
             const nextSibling = p.nextElementSibling;
-            // Перетворюємо на <h4>, якщо текст закінчується на ":", має до 50 символів і НЕ передує списку <ul> або <ol>
-            if (text.endsWith(':') && text.length <= 50 &&
+            if ((text.endsWith(':') || text.endsWith('?')) &&
                 (!nextSibling || (nextSibling.tagName !== 'UL' && nextSibling.tagName !== 'OL'))) {
                 const h4 = document.createElement('h4');
                 h4.textContent = text;
@@ -245,8 +225,8 @@
                         iframe.parentNode.removeChild(iframe);
                     }
 
-                    replaceBrWithP(tempDiv); // Замінюємо <br> на <p>
-                    removeEmTags(tempDiv);   // Видаляємо <em>
+                    replaceBrWithP(tempDiv);
+                    removeEmTags(tempDiv);
 
                     const boldElements = tempDiv.getElementsByTagName('b');
                     for (let b of Array.from(boldElements)) {
@@ -284,14 +264,25 @@
                         link.parentNode.replaceChild(textNode, link);
                     }
 
-                    cleanTextNodes(tempDiv); // Видаляємо емодзі та зайві пробіли
-                    unwrapNestedParagraphs(tempDiv); // Прибираємо вкладені <p>, зокрема з <li>
-                    splitTextIntoParagraphs(tempDiv); // Розбиваємо текст на <p> за крапками
-                    processDashLists(tempDiv); // Перетворюємо списки з тире на <ul>
-                    processNumberedLists(tempDiv); // Перетворюємо нумеровані списки на <ol>
-                    mergeAdjacentLists(tempDiv); // Об’єднуємо сусідні списки
-                    convertHeadingParagraphToH4(tempDiv); // Перетворюємо <p> із заголовками на <h4>
-                    removeEmptyParagraphs(tempDiv); // Видаляємо порожні <p>
+                    cleanTextNodes(tempDiv);
+                    unwrapNestedParagraphs(tempDiv);
+                    // splitTextIntoParagraphs вилучено для збереження оригінальних <p>
+                    processDashLists(tempDiv);
+                    processNumberedLists(tempDiv);
+                    mergeAdjacentLists(tempDiv);
+                    convertHeadingParagraphToH4(tempDiv);
+                    removeEmptyParagraphs(tempDiv);
+
+                    const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
+                    let node;
+                    while ((node = walker.nextNode())) {
+                        if (node.parentNode.tagName !== 'P' && node.parentNode.tagName !== 'LI' &&
+                            node.parentNode.tagName !== 'H4' && node.textContent.trim()) {
+                            const p = document.createElement('p');
+                            p.textContent = node.textContent.trim();
+                            node.parentNode.replaceChild(p, node);
+                        }
+                    }
 
                     const remainingElements = tempDiv.getElementsByTagName('*');
                     for (let elem of Array.from(remainingElements)) {
